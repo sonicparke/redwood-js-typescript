@@ -1,5 +1,5 @@
 import type { QueryResolvers, CommentRelationResolvers } from 'types/graphql'
-
+import { requireAuth } from 'src/lib/auth'
 import { db } from 'src/lib/db'
 
 export const comments = ({
@@ -15,7 +15,14 @@ export const comment: QueryResolvers['comment'] = ({ id }) => {
 }
 
 export const Comment: CommentRelationResolvers = {
-  ppost: (_obj, { root }) => {
-    return db.comment.findUnique({ where: { id: root?.id } }).ppost()
+  post: (_obj, { root }) => {
+    return db.comment.findUnique({ where: { id: root?.id } }).post()
   },
+}
+
+export const deleteComment = ({ id }) => {
+  requireAuth({ roles: 'moderator' })
+  return db.comment.delete({
+    where: { id },
+  })
 }
